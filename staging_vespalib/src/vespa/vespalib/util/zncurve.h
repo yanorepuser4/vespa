@@ -11,6 +11,9 @@ template<typename T>
 class ZNPoint {
 public:
     ZNPoint(const T * begin, uint32_t numDim);
+    ZNPoint(ZNPoint && rhs) = default;
+    ZNPoint & operator = (ZNPoint && rhs) = default;
+    ~ZNPoint();
     bool operator < (const ZNPoint & rhs) const;
     double distance(const ZNPoint & rhs) const;
     uint32_t numDim() const { return _vector.size(); }

@@ -34,6 +34,7 @@ vespa_define_module(
     src/tests/timer
     src/tests/util/process_memory_stats
     src/tests/xmlserializable
+    src/tests/zncurve
 
     LIBS
     src/vespa/vespalib

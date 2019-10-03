@@ -3,6 +3,7 @@
 #pragma once
 
 #include "zncurve.h"
+#include "sort.h"
 #include <cstring>
 #include <cmath>
 #include <cassert>
@@ -23,6 +24,9 @@ double squareDistance(uint32_t a, uint32_t b) {
     return diff * diff;
 }
 
+uint32_t byteIndex(uint32_t index) { return index >> 3; }
+uint8_t mask(uint32_t index) { return 1 << (7 - (index % 8)); }
+
 }
 
 template<typename T>
@@ -30,10 +34,31 @@ ZNPoint<T>::ZNPoint(const T * begin, uint32_t numDim)
     : _vector(numDim),
       _point(numDim*sizeof(T))
 {
+    using Converter = convertForSort<T, true>;
+    using ConvertedT = typename Converter::UIntType;
+    Converter converter;
+    assert(sizeof(T) == sizeof(ConvertedT));
+    std::vector<ConvertedT> converted(numDim);
     for (uint32_t i(0); i < numDim; i++) {
         _vector[i] = begin[i];
+        converted[i] = converter.convert(begin[i]);
     }
+
+    uint32_t bitPos = _point.size()*8;
+    for (uint32_t bitNum(0); bitNum < sizeof(ConvertedT)*8; bitNum++) {
+        for (uint32_t dim(converted.size()); dim; dim--) {
+           ConvertedT tmp = converted[dim - 1];
+           bitPos--;
+           if (tmp & (1 << bitNum)) {
+               _point[byteIndex(bitPos)] |= mask(bitPos);
+           }
+        }
+    }
+    assert(bitPos == 0);
 }
+
+template<typename T>
+ZNPoint<T>::~ZNPoint() = default;
 
 template<typename T>
 double
