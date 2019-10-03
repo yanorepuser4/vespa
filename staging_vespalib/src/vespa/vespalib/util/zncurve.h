@@ -3,19 +3,24 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 namespace vespalib {
 
-template<int numDim, class T>
+template<typename T>
 class ZNPoint {
 public:
-    ZNPoint(const T * begin);
-    uint64_t distance(const ZNPoint & rhs) const;
+    ZNPoint(const T * begin, uint32_t numDim);
     bool operator < (const ZNPoint & rhs) const;
+    double distance(const ZNPoint & rhs) const;
+    uint32_t numDim() const { return _vector.size(); }
 private:
-    T       _vector[numDim];
-    uint8_t _zCurve[sizeof(T)*numDim];
+    std::vector<T>       _vector;
+    std::vector<uint8_t> _point;
 };
+
+extern template class ZNPoint<uint32_t>;
+extern template class ZNPoint<float>;
 
 } // namespace vespalib
 

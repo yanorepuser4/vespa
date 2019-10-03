@@ -4,9 +4,8 @@
 
 namespace vespalib {
 
-template class ZNPoint<2, uint32_t>;
-template class ZNPoint<4, uint32_t>;
-template class ZNPoint<8, uint32_t>;
+template class ZNPoint<uint32_t>;
+template class ZNPoint<float>;
 
 } // namespace vespalib
 

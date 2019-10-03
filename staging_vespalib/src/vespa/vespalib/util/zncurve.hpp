@@ -5,36 +5,54 @@
 #include "zncurve.h"
 #include <cstring>
 #include <cmath>
+#include <cassert>
 
 namespace vespalib {
 
-template<int numDim, class T>
-ZNPoint<numDim, T>::ZNPoint(const T * begin)
-    : _vector(),
-      _zCurve()
+namespace {
+
+template<typename T>
+double squareDistance(T a, T b) {
+    T diff = a - b;
+    return diff * diff;
+}
+
+template<uint32_t>
+double squareDistance(uint32_t a, uint32_t b) {
+    int64_t diff = a - b;
+    return diff * diff;
+}
+
+}
+
+template<typename T>
+ZNPoint<T>::ZNPoint(const T * begin, uint32_t numDim)
+    : _vector(numDim),
+      _point(numDim*sizeof(T))
 {
     for (uint32_t i(0); i < numDim; i++) {
         _vector[i] = begin[i];
     }
 }
 
-template<int numDim, class T>
-uint64_t
-ZNPoint<numDim, T>::distance(const ZNPoint & rhs) const
+template<typename T>
+double
+ZNPoint<T>::distance(const ZNPoint & rhs) const
 {
-    uint64_t sum(0);
-    for (unsigned i(0); i < numDim; i++) {
-        int64_t diff = _vector[i] - rhs._vector[i];
-        sum += diff*diff;
+    assert(numDim() == rhs.numDim());
+    double sum(0);
+    for (unsigned i(0); i < numDim(); i++) {
+        sum += squareDistance(_vector[i], rhs._vector[i]);
     }
     return sqrt(sum);
 }
 
-template<int numDim, class T>
+template<typename T>
 bool
-ZNPoint<numDim, T>::operator < (const ZNPoint & rhs) const
+ZNPoint<T>::operator < (const ZNPoint & rhs) const
 {
-    return memcmp(_zCurve, rhs._zCurve, sizeof(_zCurve)) < 0;
+    assert(numDim() == rhs.numDim());
+    return memcmp(&_point[0], &rhs._point[0], _point.size()) < 0;
 }
 
 } // namespace vespalib
