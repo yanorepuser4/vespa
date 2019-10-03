@@ -19,5 +19,6 @@ vespa_add_library(staging_vespalib_vespalib_util OBJECT
     timer.cpp
     xmlserializable.cpp
     xmlstream.cpp
+    zncurve.cpp
     DEPENDS
 )
