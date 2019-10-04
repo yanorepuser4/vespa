@@ -18,8 +18,9 @@ double squareDistance(T a, T b) {
     return diff * diff;
 }
 
-template<uint32_t>
-double squareDistance(uint32_t a, uint32_t b) {
+template<>
+double squareDistance(uint32_t a32, uint32_t b32) {
+    int64_t a = a32, b = b32;
     int64_t diff = a - b;
     return diff * diff;
 }
@@ -46,7 +47,20 @@ ZNPoint<T>::ZNPoint(const T * begin, uint32_t numDim)
 
     uint32_t bitPos = _point.size()*8;
     for (uint32_t bitNum(0); bitNum < sizeof(ConvertedT)*8; bitNum++) {
-        for (uint32_t dim(converted.size()); dim; dim--) {
+        uint32_t dim(converted.size());
+        for (; dim >= 8; dim -= 8) {
+            bitPos -= 8;
+            _point[byteIndex(bitPos)] =
+                 ((converted[dim - 1] >> bitNum) & 0x01l) |
+                (((converted[dim - 2] >> bitNum) & 0x01l) << 1)|
+                (((converted[dim - 3] >> bitNum) & 0x01l) << 2)|
+                (((converted[dim - 4] >> bitNum) & 0x01l) << 3)|
+                (((converted[dim - 5] >> bitNum) & 0x01l) << 4)|
+                (((converted[dim - 6] >> bitNum) & 0x01l) << 5)|
+                (((converted[dim - 7] >> bitNum) & 0x01l) << 6)|
+                (((converted[dim - 8] >> bitNum) & 0x01l) << 7);
+        }
+        for (; dim; dim--) {
            ConvertedT tmp = converted[dim - 1];
            bitPos--;
            if (tmp & (1 << bitNum)) {
@@ -56,6 +70,11 @@ ZNPoint<T>::ZNPoint(const T * begin, uint32_t numDim)
     }
     assert(bitPos == 0);
 }
+
+template<typename T>
+ZNPoint<T>::ZNPoint(const ZNPoint &) = default;
+template<typename T>
+ZNPoint<T> & ZNPoint<T>::operator = (const ZNPoint &) = default;
 
 template<typename T>
 ZNPoint<T>::~ZNPoint() = default;
@@ -70,6 +89,38 @@ ZNPoint<T>::distance(const ZNPoint & rhs) const
         sum += squareDistance(_vector[i], rhs._vector[i]);
     }
     return sqrt(sum);
+}
+
+template<typename T>
+void
+ZNPoint<T>::ceil(uint32_t numLSB)
+{
+    uint32_t numBits2Set = numLSB * numDim();
+    uint32_t numBytes2Set = numBits2Set / 8;
+    uint32_t startByte = _point.size() - numBytes2Set;
+    for (uint32_t byteIdx(startByte); byteIdx < _point.size(); byteIdx++) {
+        _point[byteIdx] = 0xff;
+    }
+    for (uint32_t i(numBytes2Set * 8); i < numBits2Set; i++) {
+        uint32_t bitPos = (_point.size() * 8) - i;
+        _point[byteIndex(bitPos)] |= mask(bitPos);
+    }
+}
+
+template<typename T>
+void
+ZNPoint<T>::floor(uint32_t numLSB)
+{
+    uint32_t numBits2Set = numLSB * numDim();
+    uint32_t numBytes2Set = numBits2Set / 8;
+    uint32_t startByte = _point.size() - numBytes2Set;
+    for (uint32_t byteIdx(startByte); byteIdx < _point.size(); byteIdx++) {
+        _point[byteIdx] = 0x00;
+    }
+    for (uint32_t i(numBytes2Set * 8); i < numBits2Set; i++) {
+        uint32_t bitPos = (_point.size() * 8) - i;
+        _point[byteIndex(bitPos)] &= ~mask(bitPos);
+    }
 }
 
 template<typename T>
