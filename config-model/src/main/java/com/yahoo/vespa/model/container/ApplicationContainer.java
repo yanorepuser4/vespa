@@ -3,7 +3,6 @@ package com.yahoo.vespa.model.container;
 
 import com.yahoo.config.model.api.container.ContainerServiceType;
 import com.yahoo.config.model.producer.AbstractConfigProducer;
-import com.yahoo.config.provision.Flavor;
 import com.yahoo.container.bundle.BundleInstantiationSpecification;
 import com.yahoo.osgi.provider.model.ComponentModel;
 import com.yahoo.prelude.fastsearch.FS4ResourcePool;
@@ -40,9 +39,12 @@ public final class ApplicationContainer extends Container implements QrStartConf
 
     @Override
     public void getConfig(QrStartConfig.Builder builder) {
-        if (getHostResource() != null) {
+        ApplicationContainerCluster cluster = (ApplicationContainerCluster) getParent();
+        if (isHostedVespa && getHostResource() != null) {
             if (getHostResource().getFlavor().isPresent()) {
-                NodeFlavorTuning flavorTuning = new NodeFlavorTuning(getHostResource().getFlavor().get());
+                boolean isCombinedCluster = cluster.getHostClusterId().isPresent();
+                NodeFlavorTuning flavorTuning = new NodeFlavorTuning(getHostResource().getFlavor().get(),
+                                                                     cluster.getMemoryPercentage().orElse(isCombinedCluster ? 17 : 60));
                 flavorTuning.getConfig(builder);
             }
         }

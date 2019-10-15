@@ -200,7 +200,11 @@ public class ModelProvisioningTest {
 
         assertEquals("Nodes in content1", 2, model.getContentClusters().get("content1").getRootGroup().getNodes().size());
         assertEquals("Nodes in container1", 1, model.getContainerClusters().get("container1").getContainers().size());
-        assertEquals("Heap size for container", 60, physicalMemoryPercentage(model.getContainerClusters().get("container1")));
+        QrStartConfig qrStartConfig = qrStartConfig(model, "container1/container.0");
+        assertEquals("Heap size percentage for container", 0, qrStartConfig.jvm().heapSizeAsPercentageOfPhysicalMemory());
+        int expectedHeapSize = (int)(0.6 * 3.0 * 1000);
+        assertEquals("Heap size for container", expectedHeapSize, qrStartConfig.jvm().heapsize());
+        assertEquals("Min Heap size for container", expectedHeapSize, qrStartConfig.jvm().minHeapsize());
     }
 
     @Test
@@ -247,8 +251,11 @@ public class ModelProvisioningTest {
 
         assertEquals("Nodes in content1", 2, model.getContentClusters().get("content1").getRootGroup().getNodes().size());
         assertEquals("Nodes in container1", 2, model.getContainerClusters().get("container1").getContainers().size());
-        assertEquals("Heap size is lowered with combined clusters", 
-                     17, physicalMemoryPercentage(model.getContainerClusters().get("container1")));
+        QrStartConfig qrStartConfig = qrStartConfig(model, "container1/container.0");
+        assertEquals("Heap size percentage for container", 0, qrStartConfig.jvm().heapSizeAsPercentageOfPhysicalMemory());
+        int expectedHeapSize = (int)(0.17 * 3.0 * 1000);
+        assertEquals("Heap size for container", expectedHeapSize, qrStartConfig.jvm().heapsize());
+        assertEquals("Min Heap size for container", expectedHeapSize, qrStartConfig.jvm().minHeapsize());
     }
 
     @Test
@@ -1641,10 +1648,10 @@ public class ModelProvisioningTest {
         return modelCreatorWithMockPkg.create(false, deployState);
     }
 
-    private int physicalMemoryPercentage(ContainerCluster cluster) {
+    private QrStartConfig qrStartConfig(VespaModel model, String configId) {
         QrStartConfig.Builder b = new QrStartConfig.Builder();
-        cluster.getConfig(b);
-        return new QrStartConfig(b).jvm().heapSizeAsPercentageOfPhysicalMemory();
+        model.getConfig(b, configId);
+        return new QrStartConfig(b);
     }
 
     @Test

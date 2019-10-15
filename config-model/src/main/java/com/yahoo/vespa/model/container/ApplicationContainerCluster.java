@@ -199,8 +199,6 @@ public final class ApplicationContainerCluster extends ContainerCluster<Applicat
                 .heapsize(1536);
         if (getMemoryPercentage().isPresent()) {
             builder.jvm.heapSizeAsPercentageOfPhysicalMemory(getMemoryPercentage().get());
-        } else if (isHostedVespa()) {
-            builder.jvm.heapSizeAsPercentageOfPhysicalMemory(getHostClusterId().isPresent() ? 17 : 60);
         }
     }
 

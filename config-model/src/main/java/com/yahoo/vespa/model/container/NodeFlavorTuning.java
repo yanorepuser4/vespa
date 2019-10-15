@@ -12,14 +12,18 @@ import com.yahoo.search.config.QrStartConfig;
 public class NodeFlavorTuning implements QrStartConfig.Producer {
 
     private final Flavor flavor;
-
-    NodeFlavorTuning(Flavor flavor) {
+    private final double memoryFraction;
+    NodeFlavorTuning(Flavor flavor, double memoryPercentage) {
         this.flavor = flavor;
+        this.memoryFraction = memoryPercentage / 100;
     }
 
     @Override
     public void getConfig(QrStartConfig.Builder builder) {
         builder.jvm.availableProcessors(Math.max(2, (int)Math.ceil(flavor.getMinCpuCores())));
+        int heapSize = (int)(memoryFraction*flavor.getMinMainMemoryAvailableGb()*1000);
+        builder.jvm.minHeapsize(heapSize).heapsize(heapSize);
+        builder.jvm.heapSizeAsPercentageOfPhysicalMemory(0);
     }
 
 }
