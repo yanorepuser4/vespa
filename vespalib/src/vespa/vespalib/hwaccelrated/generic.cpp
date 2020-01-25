@@ -124,18 +124,18 @@ GenericAccelrator::dotProduct(const int64_t * a, const int64_t * b, size_t sz) c
 void
 GenericAccelrator::orBit(void * aOrg, const void * bOrg, size_t bytes) const
 {
-    bitOperation<8>([](uint64_t a, uint64_t b) { return a | b; }, aOrg, bOrg, bytes);
+    helper::bitOperation<8>([](uint64_t a, uint64_t b) { return a | b; }, aOrg, bOrg, bytes);
 }
 
 void
 GenericAccelrator::andBit(void * aOrg, const void * bOrg, size_t bytes) const 
 {
-    bitOperation<8>([](uint64_t a, uint64_t b) { return a & b; }, aOrg, bOrg, bytes);
+    helper::bitOperation<8>([](uint64_t a, uint64_t b) { return a & b; }, aOrg, bOrg, bytes);
 }
 void
 GenericAccelrator::andNotBit(void * aOrg, const void * bOrg, size_t bytes) const 
 {
-    bitOperation<8>([](uint64_t a, uint64_t b) { return a & ~b; }, aOrg, bOrg, bytes);
+    helper::bitOperation<8>([](uint64_t a, uint64_t b) { return a & ~b; }, aOrg, bOrg, bytes);
 }
 
 void
