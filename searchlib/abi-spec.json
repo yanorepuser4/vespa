@@ -1413,6 +1413,7 @@
       "public void <init>(java.util.Collection, java.util.Map)",
       "public void <init>(java.util.Map)",
       "public void <init>(java.util.Map, java.util.Map)",
+      "public void <init>(java.util.Map, java.util.Map, com.yahoo.searchlib.rankingexpression.rule.FunctionReferenceContext)",
       "public com.yahoo.searchlib.rankingexpression.ExpressionFunction getFunction(java.lang.String)",
       "protected com.google.common.collect.ImmutableMap functions()",
       "public java.lang.String getBinding(java.lang.String)",
@@ -1568,7 +1569,7 @@
       "public void <init>(java.util.Map)",
       "public void <init>(java.util.Collection, java.util.Map)",
       "public void <init>(java.util.Collection, java.util.Map, java.util.Map)",
-      "public void <init>(com.google.common.collect.ImmutableMap, java.util.Map, java.util.Map)",
+      "public void <init>(com.google.common.collect.ImmutableMap, java.util.Map, java.util.Map, com.yahoo.searchlib.rankingexpression.rule.FunctionReferenceContext)",
       "public void addFunctionSerialization(java.lang.String, java.lang.String)",
       "public void addArgumentTypeSerialization(java.lang.String, java.lang.String, com.yahoo.tensor.TensorType)",
       "public void addFunctionTypeSerialization(java.lang.String, com.yahoo.tensor.TensorType)",
@@ -1594,6 +1595,24 @@
       "public com.yahoo.searchlib.rankingexpression.evaluation.Value evaluate(com.yahoo.searchlib.rankingexpression.evaluation.Context)",
       "public com.yahoo.searchlib.rankingexpression.rule.SetMembershipNode setChildren(java.util.List)",
       "public bridge synthetic com.yahoo.searchlib.rankingexpression.rule.CompositeNode setChildren(java.util.List)"
+    ],
+    "fields": []
+  },
+  "com.yahoo.searchlib.rankingexpression.rule.TensorFunctionNode$ExpressionScalarFunction": {
+    "superClass": "java.lang.Object",
+    "interfaces": [
+      "com.yahoo.tensor.functions.ScalarFunction"
+    ],
+    "attributes": [
+      "public"
+    ],
+    "methods": [
+      "public void <init>(com.yahoo.searchlib.rankingexpression.rule.ExpressionNode)",
+      "public com.yahoo.searchlib.rankingexpression.rule.ExpressionNode getExpression()",
+      "public java.lang.Double apply(com.yahoo.tensor.evaluation.EvaluationContext)",
+      "public java.lang.String toString()",
+      "public java.lang.String toString(com.yahoo.tensor.functions.ToStringContext)",
+      "public bridge synthetic java.lang.Object apply(java.lang.Object)"
     ],
     "fields": []
   },

@@ -390,6 +390,126 @@ public class EvaluationTestCase {
     }
 
     @Test
+    public void testTile() {
+        EvaluationTester tester = new EvaluationTester();
+
+        tester.assertEvaluates("tensor(d0[2],d1[4]):[1,2,1,2,3,4,3,4]",
+                "tensor(d0[2],d1[4])(tensor0{input0:(d0 % 2), input1:(d1 % 2) } )",
+                "tensor(input0[2],input1[2]):[1, 2, 3, 4]",
+                "tensor(repeats0[2]):[1,2]");
+
+        tester.assertEvaluates("tensor(d0[6],d1[2]):[1,2,3,4,1,2,3,4,1,2,3,4]",
+                "tensor(d0[6],d1[2])(tensor0{input0:(d0 % 2), input1:(d1 % 2) } )",
+                "tensor(input0[2],input1[2]):[1, 2, 3, 4]",
+                "tensor(repeats0[2]):[3,1]");
+    }
+
+    @Test
+    public void testReshape() {
+        EvaluationTester tester = new EvaluationTester();
+
+        tester.assertEvaluates("tensor(d0[4]):[1,2,3,4]",
+                "tensor(d0[4])(tensor0{a0:(d0 / 2), a1:(d0 % 2)})",
+                "tensor(a0[2],a1[2]):[1,2,3,4]",
+                "tensor(d0[1]):[4]");
+
+        tester.assertEvaluates("tensor(d0[2],d1[2]):[1,2,3,4]",
+                "tensor(d0[2],d1[2])(tensor0{a0:(d0), a1:(d1)})",
+                "tensor(a0[2],a1[2]):[1,2,3,4]",
+                "tensor(d0[2]):[2,2]");
+
+        tester.assertEvaluates("tensor(d0[2],d1[1],d2[2]):[1,2,3,4]",
+                "tensor(d0[2],d1[1],d2[2])(tensor0{a0:(d0), a1:(d2)})",
+                "tensor(a0[2],a1[2]):[1,2,3,4]",
+                "tensor(d0[3]):[2,1,2]");
+
+        tester.assertEvaluates("tensor(d0[3],d1[2]):[1,2,3,4,5,6]",
+                "tensor(d0[3],d1[2])(tensor0{a0:0, a1:((d0 * 2 + d1) / 3), a2:((d0 * 2 + d1) % 3) })",
+                "tensor(a0[1],a1[2],a2[3]):[1,2,3,4,5,6]",
+                "tensor(d0[2]):[3,2]");
+
+        tester.assertEvaluates("tensor(d0[3],d1[2],d2[1],d3[1]):[1,2,3,4,5,6]",
+                "tensor(d0[3],d1[2],d2[1],d3[1])(tensor0{a0:0, a1:((d0 * 2 + d1) / 3), a2:((d0 * 2 + d1) % 3) })",
+                "tensor(a0[1],a1[2],a2[3]):[1,2,3,4,5,6]",
+                "tensor(d0[4]):[3,2,-1,1]");
+
+    }
+
+    @Test
+    public void testMatmul() {
+        EvaluationTester tester = new EvaluationTester();
+
+        tester.assertEvaluates("tensor():{91}",
+                "reduce(join(tensor0, tensor1, f(x,y)(x*y)), sum, d0)",
+                "tensor(d0[6]):[1,2,3,4,5,6]",
+                "tensor(d0[6]):[1,2,3,4,5,6]");
+
+        tester.assertEvaluates("tensor(d1[2]):[22, 28]",
+                "reduce(join(tensor0, tensor1, f(x,y)(x*y)), sum, d0)",
+                "tensor(d0[3]):[1,2,3]",
+                "tensor(d0[3],d1[2]):[1,2,3,4,5,6]");
+
+        tester.assertEvaluates("tensor(d1[2]):[22, 28]",
+                "reduce(join(tensor0, tensor1, f(x,y)(x*y)), sum, d0)",
+                "tensor(d0[3],d1[2]):[1,2,3,4,5,6]",
+                "tensor(d0[3]):[1,2,3]");
+
+        tester.assertEvaluates("tensor(d0[2],d2[2]):[22,28,49,64]",
+                "reduce(join(tensor0, tensor1, f(x,y)(x*y)), sum, d1)",
+                "tensor(d0[2],d1[3]):[1,2,3,4,5,6]",
+                "tensor(d1[3],d2[2]):[1,2,3,4,5,6]");
+
+        tester.assertEvaluates("tensor(d0[1],d1[2],d3[2]):[22,28,49,64]",
+                "reduce(join(tensor0, tensor1, f(x,y)(x*y)), sum, d2)",
+                "tensor(d0[1],d1[2],d2[3]):[1,2,3,4,5,6]",
+                "tensor(d2[3],d3[2]):[1,2,3,4,5,6]");
+
+        tester.assertEvaluates("tensor(d0[1],d1[2],d3[2]):[22,28,49,64]",
+                "reduce(join(tensor0, tensor1, f(x,y)(x*y)), sum, d2)",
+                "tensor(d1[2],d2[3]):[1,2,3,4,5,6]",
+                "tensor(d0[1],d2[3],d3[2]):[1,2,3,4,5,6]");
+
+        tester.assertEvaluates("tensor(d0[1],d1[4],d2[2],d4[2]):[22,28,49,64,58,64,139,154,94,100,229,244,130,136,319,334]",
+                "reduce(join(tensor0{d1:0}, tensor1, f(x,y)(x*y)), sum, d3)",  // notice peek
+                "tensor(d0[1],d1[1],d2[2],d3[3]):[1,2,3,4,5,6]",
+                "tensor(d0[1],d1[4],d3[3],d4[2]):[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]");
+
+        tester.assertEvaluates("tensor(d0[1],d1[4],d2[2],d4[2]):[22,28,49,64,220,244,301,334,634,676,769,820,1264,1324,1453,1522]",
+                "reduce(join(tensor0, tensor1, f(x,y)(x*y)), sum, d3)",
+                "tensor(d0[1],d1[4],d2[2],d3[3]):[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]",
+                "tensor(d0[1],d1[4],d3[3],d4[2]):[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]");
+
+    }
+
+    @Test
+    public void testSplit() {
+        EvaluationTester tester = new EvaluationTester();
+
+        tester.assertEvaluates("tensor(d0[3]):[1,2,3]",
+                "tensor(d0[3])(tensor0{input0:(d0)} )",
+                "tensor(input0[6]):[1,2,3,4,5,6]");
+        tester.assertEvaluates("tensor(d0[3]):[4,5,6]",
+                "tensor(d0[3])(tensor0{input0:(d0+3)} )",
+                "tensor(input0[6]):[1,2,3,4,5,6]");
+        tester.assertEvaluates("tensor(d0[4]):[3,4,5,6]",
+                "tensor(d0[4])(tensor0{input0:(d0+2)} )",
+                "tensor(input0[6]):[1,2,3,4,5,6]");
+        tester.assertEvaluates("tensor(d0[2]):[3,4]",
+                "tensor(d0[2])(tensor0{input0:(d0+2)} )",
+                "tensor(input0[6]):[1,2,3,4,5,6]");
+        tester.assertEvaluates("tensor(d0[2]):[5,6]",
+                "tensor(d0[2])(tensor0{input0:(d0+4)} )",
+                "tensor(input0[6]):[1,2,3,4,5,6]");
+
+        tester.assertEvaluates("tensor(d0[1],d1[3]):[1,2,3]",
+                "tensor(d0[1],d1[3])(tensor0{input0:(d0), input1:(d1)} )",
+                "tensor(input0[2],input1[3]):[[1,2,3],[4,5,6]]");
+        tester.assertEvaluates("tensor(d0[1],d1[3]):[4,5,6]",
+                "tensor(d0[1],d1[3])(tensor0{input0:(d0+1), input1:(d1)} )",
+                "tensor(input0[2],input1[3]):[[1,2,3],[4,5,6]]");
+    }
+
+    @Test
     public void testTake() {
         EvaluationTester tester = new EvaluationTester();
 

@@ -79,6 +79,7 @@ public class RankingExpressionTypeResolver extends Processor {
             }
             context.forgetResolvedTypes();
 
+            System.out.println("Resolving type for " + function.getKey());
             TensorType type = resolveType(expressionFunction.getBody(), "function '" + function.getKey() + "'", context);
             function.getValue().setReturnType(type);
         }

@@ -58,7 +58,12 @@ class IndexedDoubleTensor extends IndexedTensor {
 
         @Override
         public IndexedTensor.BoundBuilder cell(double value, long ... indexes) {
-            values[(int)toValueIndex(indexes, sizes())] = value;
+            int index = (int)toValueIndex(indexes, sizes());
+            if (index < 0 || index >= values.length) {
+                System.out.println("Argh");
+            }
+            values[index] = value;
+//            values[(int)toValueIndex(indexes, sizes())] = value;
             return this;
         }
 

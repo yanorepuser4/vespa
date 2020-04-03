@@ -7,6 +7,7 @@ import ai.vespa.rankingexpression.importer.operations.MatMul;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,6 +75,8 @@ public class IntermediateGraph {
         renameDimensions();
     }
 
+    static int counter = 0;
+
     /**
      * Find dimension names to avoid excessive renaming while evaluating the model.
      */
@@ -93,16 +96,34 @@ public class IntermediateGraph {
     }
 
     private static void addDimensionNameConstraints(IntermediateOperation operation, DimensionRenamer renamer) {
+        Set<String> operations = new HashSet<>();
+        addDimensionNameConstraints(operation, renamer, operations);
+    }
+
+    private static void addDimensionNameConstraints(IntermediateOperation operation, DimensionRenamer renamer, Set<String> operations) {
+        if (operations.contains(operation.name())) {
+            return;
+        }
         if (operation.type().isPresent()) {
-            operation.inputs().forEach(input -> addDimensionNameConstraints(input, renamer));
+            operation.inputs().forEach(input -> addDimensionNameConstraints(input, renamer, operations));
             operation.addDimensionNameConstraints(renamer);
+            operations.add(operation.name());
         }
     }
 
     private static void renameDimensions(IntermediateOperation operation, DimensionRenamer renamer) {
+        Set<String> operations = new HashSet<>();
+        renameDimensions(operation, renamer, operations);
+    }
+
+    private static void renameDimensions(IntermediateOperation operation, DimensionRenamer renamer, Set<String> operations) {
+        if (operations.contains(operation.name())) {
+            return;
+        }
         if (operation.type().isPresent()) {
-            operation.inputs().forEach(input -> renameDimensions(input, renamer));
+            operation.inputs().forEach(input -> renameDimensions(input, renamer, operations));
             operation.renameDimensions(renamer);
+            operations.add(operation.name());
         }
     }
 

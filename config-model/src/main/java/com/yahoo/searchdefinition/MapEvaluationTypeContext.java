@@ -47,12 +47,15 @@ public class MapEvaluationTypeContext extends FunctionReferenceContext implement
     private final SortedSet<Reference> queryFeaturesNotDeclared;
     private boolean tensorsAreUsed;
 
+    private final MapEvaluationTypeContext parent;
+
     MapEvaluationTypeContext(Collection<ExpressionFunction> functions, Map<Reference, TensorType> featureTypes) {
         super(functions);
         this.featureTypes.putAll(featureTypes);
         this.currentResolutionCallStack =  new ArrayDeque<>();
         this.queryFeaturesNotDeclared = new TreeSet<>();
         tensorsAreUsed = false;
+        parent = null;
     }
 
     private MapEvaluationTypeContext(Map<String, ExpressionFunction> functions,
@@ -60,12 +63,14 @@ public class MapEvaluationTypeContext extends FunctionReferenceContext implement
                                      Map<Reference, TensorType> featureTypes,
                                      Deque<Reference> currentResolutionCallStack,
                                      SortedSet<Reference> queryFeaturesNotDeclared,
-                                     boolean tensorsAreUsed) {
+                                     boolean tensorsAreUsed,
+                                     MapEvaluationTypeContext parent) {
         super(functions, bindings);
         this.featureTypes.putAll(featureTypes);
         this.currentResolutionCallStack = currentResolutionCallStack;
         this.queryFeaturesNotDeclared = queryFeaturesNotDeclared;
         this.tensorsAreUsed = tensorsAreUsed;
+        this.parent = parent;
     }
 
     public void setType(Reference reference, TensorType type) {
@@ -82,16 +87,45 @@ public class MapEvaluationTypeContext extends FunctionReferenceContext implement
         resolvedTypes.clear();
     }
 
+    private TensorType resolvedType(Reference reference, int depth) {
+//        System.out.println(indent + "In resolvedtype - resolving type for " + reference.toString());
+        TensorType resolvedType = resolvedTypes.get(reference);
+        if (resolvedType != null) {
+//            System.out.println("Found previously resolved type for " + reference + " at depth " + depth + ": (" + resolvedType + ")");
+            return resolvedType;
+        }
+        if (parent != null) return parent.resolvedType(reference, depth + 1);  // what about argument types? Careful with this!
+//        System.out.println("Could NOT find type for " + reference + " - down to depth " + depth);
+        return null;
+    }
+
+    private MapEvaluationTypeContext findOriginalParent() {
+        if (parent != null)
+            return parent.findOriginalParent();
+        return this;
+    }
+
     @Override
     public TensorType getType(Reference reference) {
         // computeIfAbsent without concurrent modification due to resolve adding more resolved entries:
-        TensorType resolvedType = resolvedTypes.get(reference);
+        // TensorType resolvedType = resolvedTypes.get(reference);
+        TensorType resolvedType = resolvedType(reference, 0);
         if (resolvedType != null) return resolvedType;
 
         resolvedType = resolveType(reference);
         if (resolvedType == null)
             return defaultTypeOf(reference); // Don't store fallback to default as we may know more later
-        resolvedTypes.put(reference, resolvedType);
+
+//        System.out.println("Resolved type of " + reference + ": (" + resolvedType + ")");
+
+        // Må inn her med et konsept av global eller lokal.
+        // For globale - legg i lavest parent!
+        MapEvaluationTypeContext originalParent = findOriginalParent();
+        if (originalParent == null) {
+            originalParent = this;
+        }
+        originalParent.resolvedTypes.put(reference, resolvedType);
+
         if (resolvedType.rank() > 0)
             tensorsAreUsed = true;
         return resolvedType;
@@ -102,6 +136,7 @@ public class MapEvaluationTypeContext extends FunctionReferenceContext implement
             throw new IllegalArgumentException("Invocation loop: " +
                                                currentResolutionCallStack.stream().map(Reference::toString).collect(Collectors.joining(" -> ")) +
                                                " -> " + reference);
+
 
         // Bound to a function argument, and not to a same-named identifier (which would lead to a loop)?
         Optional<String> binding = boundIdentifier(reference);
@@ -254,7 +289,7 @@ public class MapEvaluationTypeContext extends FunctionReferenceContext implement
                                             featureTypes,
                                             currentResolutionCallStack,
                                             queryFeaturesNotDeclared,
-                                            tensorsAreUsed);
+                                            tensorsAreUsed, this);
     }
 
 }

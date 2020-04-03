@@ -71,6 +71,10 @@ public class Generate<NAMETYPE extends Name> extends PrimitiveTensorFunction<NAM
                 throw new IllegalArgumentException("A generated tensor can only have indexed bound dimensions");
     }
 
+    public ScalarFunction<NAMETYPE> getBoundGenerator() {
+        return boundGenerator;
+    }
+
     @Override
     public List<TensorFunction<NAMETYPE>> arguments() { return Collections.emptyList(); }
 

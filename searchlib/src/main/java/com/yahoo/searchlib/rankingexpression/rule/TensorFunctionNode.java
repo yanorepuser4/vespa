@@ -143,12 +143,16 @@ public class TensorFunctionNode extends CompositeNode {
         return new ExpressionScalarFunction(node);
     }
 
-    private static class ExpressionScalarFunction implements ScalarFunction<Reference> {
+    public static class ExpressionScalarFunction implements ScalarFunction<Reference> {
 
         private final ExpressionNode expression;
 
         public ExpressionScalarFunction(ExpressionNode expression) {
             this.expression = expression;
+        }
+
+        public ExpressionNode getExpression() {
+            return expression;
         }
 
         @Override
@@ -321,13 +325,45 @@ public class TensorFunctionNode extends CompositeNode {
 
         public ToStringContext parent() { return wrappedToStringContext; }
 
+        private int contextNodes() {
+            int nodes = 0;
+            if (wrappedToStringContext != null && wrappedToStringContext instanceof ExpressionToStringContext) {
+                nodes += ((ExpressionToStringContext)wrappedToStringContext).contextNodes();
+            } else if (wrappedToStringContext != null) {
+                nodes += 1;
+            }
+            if (wrappedSerializationContext != null && wrappedSerializationContext instanceof ExpressionToStringContext) {
+                nodes += ((ExpressionToStringContext)wrappedSerializationContext).contextNodes();
+            } else if (wrappedSerializationContext != null) {
+                nodes += 1;
+            }
+            return nodes + 1;
+        }
+
+        private int contextDepth() {
+            int depth = 0;
+            if (wrappedToStringContext != null && wrappedToStringContext instanceof ExpressionToStringContext) {
+                depth += ((ExpressionToStringContext)wrappedToStringContext).contextDepth();
+            }
+            if (wrappedSerializationContext != null && wrappedSerializationContext instanceof ExpressionToStringContext) {
+                int d = ((ExpressionToStringContext)wrappedSerializationContext).contextDepth();
+                depth = Math.max(depth, d);
+            }
+            return depth + 1;
+        }
+
         /** Returns the resolution of an identifier, or null if it isn't defined in this context */
         @Override
         public String getBinding(String name) {
-            if (wrappedToStringContext != null && wrappedToStringContext.getBinding(name) != null)
-                return wrappedToStringContext.getBinding(name);
-            else
-                return wrappedSerializationContext.getBinding(name);
+//            System.out.println("getBinding for " + name + " with node count " + contextNodes() + " and max depth " + contextDepth());
+            String binding;
+            if (wrappedToStringContext != null) {
+                binding = wrappedToStringContext.getBinding(name);
+                if (binding != null) {
+                    return binding;
+                }
+            }
+            return wrappedSerializationContext.getBinding(name);
         }
 
         /** Returns a new context with the bindings replaced by the given bindings */

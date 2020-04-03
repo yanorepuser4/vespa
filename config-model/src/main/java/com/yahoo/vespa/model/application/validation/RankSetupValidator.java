@@ -102,7 +102,8 @@ public class RankSetupValidator extends Validator {
     }
 
     private void deleteTempDir(File dir) {
-        IOUtils.recursiveDeleteDir(dir);
+        System.out.println("Here we were supposed to delete tmpdir: " + dir.getAbsolutePath());
+//        IOUtils.recursiveDeleteDir(dir);
     }
 
     private void writeConfigs(String dir, AbstractConfigProducer<?> producer) throws IOException {
@@ -133,7 +134,13 @@ public class RankSetupValidator extends Validator {
     }
 
     private static void writeConfig(String dir, String configName, ConfigInstance config) throws IOException {
-        IOUtils.writeFile(dir + configName, StringUtilities.implodeMultiline(ConfigInstance.serialize(config)), false);
+
+        String output = StringUtilities.implodeMultiline(ConfigInstance.serialize(config));
+        System.out.println("Writing config for in " + dir + " for configName '" + configName + "' ");
+        System.out.println(output);
+        IOUtils.writeFile(dir + configName, output, false);
+
+//        IOUtils.writeFile(dir + configName, StringUtilities.implodeMultiline(ConfigInstance.serialize(config)), false);
     }
 
     private boolean execValidate(String configId, SearchCluster sc, String sdName, DeployLogger deployLogger) {

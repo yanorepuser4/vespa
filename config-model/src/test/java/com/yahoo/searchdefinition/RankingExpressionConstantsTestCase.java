@@ -2,8 +2,11 @@
 package com.yahoo.searchdefinition;
 
 import com.yahoo.collections.Pair;
+import com.yahoo.config.model.application.provider.BaseDeployLogger;
+import com.yahoo.config.model.deploy.TestProperties;
 import com.yahoo.search.query.profile.QueryProfileRegistry;
 import ai.vespa.rankingexpression.importer.configmodelview.ImportedMlModels;
+import com.yahoo.searchdefinition.derived.DerivedConfiguration;
 import com.yahoo.yolean.Exceptions;
 import com.yahoo.searchdefinition.derived.AttributeFields;
 import com.yahoo.searchdefinition.derived.RawRankProfile;
@@ -82,6 +85,18 @@ public class RankingExpressionConstantsTestCase extends SchemaTestCase {
                                                                        new AttributeFields(s)).configProperties();
         assertEquals("(rankingExpression(foo).rankingScript,14.0)", rankProperties.get(0).toString());
         assertEquals("(rankingExpression(firstphase).rankingScript,16.6)", rankProperties.get(2).toString());
+
+        try {
+            DerivedConfiguration config = new DerivedConfiguration(s,
+                    new BaseDeployLogger(),
+                    new TestProperties(),
+                    rankProfileRegistry,
+                    queryProfileRegistry,
+                    new ImportedMlModels());
+            config.export("/Users/lesters/temp/bert/idea/");
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     @Test

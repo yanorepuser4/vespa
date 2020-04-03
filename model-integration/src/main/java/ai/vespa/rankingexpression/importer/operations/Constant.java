@@ -22,10 +22,10 @@ public class Constant extends IntermediateOperation {
     }
 
     /** Constant names are prefixed by "modelName_" to avoid name conflicts between models */
-    @Override
-    public String vespaName() {
-        return modelName + "_" + vespaName(name);
-    }
+//    @Override
+//    public String vespaName() {
+//        return modelName + "_" + vespaName(name);
+//    }
 
     @Override
     protected OrderedTensorType lazyGetType() {
@@ -61,7 +61,9 @@ public class Constant extends IntermediateOperation {
     public Constant withInputs(List<IntermediateOperation> inputs) {
         if ( ! inputs.isEmpty())
             throw new IllegalArgumentException("Constant cannot take inputs");
-        return new Constant(modelName(), name(), type);
+        Constant constant = new Constant(modelName(), name(), type);
+        constant.setConstantValueFunction(constantValueFunction);
+        return constant;
     }
 
     @Override

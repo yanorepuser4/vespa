@@ -74,20 +74,49 @@ public final class ReferenceNode extends CompositeNode {
             return string.append(context.getBinding(getName()));
         }
 
+        String name = getName();
         // A reference to a function?
         ExpressionFunction function = context.getFunction(getName());
         if (function != null && function.arguments().size() == getArguments().size() && getOutput() == null) {
             // a function reference: replace by the referenced function wrapped in rankingExpression
-            if (path == null)
-                path = new ArrayDeque<>();
-            String myPath = getName() + getArguments().expressions();
-            if (path.contains(myPath))
-                throw new IllegalStateException("Cycle in ranking expression function: " + path);
-            path.addLast(myPath);
-            ExpressionFunction.Instance instance = function.expand(context, getArguments().expressions(), path);
-            path.removeLast();
-            context.addFunctionSerialization(RankingExpression.propertyName(instance.getName()), instance.getExpressionString());
-            return string.append("rankingExpression(").append(instance.getName()).append(')');
+//            if (path == null)
+//                path = new ArrayDeque<>();
+//            String myPath = getName() + getArguments().expressions();
+//            if (path.contains(myPath))
+//                throw new IllegalStateException("Cycle in ranking expression function: " + path);
+//            path.addLast(myPath);
+//            ExpressionFunction.Instance instance = function.expand(context, getArguments().expressions(), path);
+//            path.removeLast();
+//            context.addFunctionSerialization(RankingExpression.propertyName(instance.getName()), instance.getExpressionString());
+//            return string.append("rankingExpression(").append(instance.getName()).append(')');
+
+//            return new Instance(toSymbol(argumentBindings), body.getRoot().toString(new StringBuilder(), context.withBindings(argumentBindings), path, null).toString());
+
+            // hack for testing:
+            // So, this worked. Meaning that when expanding we could probably cut down on the context tree?
+//            String expression = function.getBody().toString();
+//            context.addFunctionSerialization(RankingExpression.propertyName(getName()), expression);  // <- actually set by deriveFunctionProperties - this will only overwrite
+
+            String prefix = string.toString();  // incredibly ugly hack  - for testing this
+
+            // so problem here with input values
+            if (prefix.startsWith("attribute")) {
+                if (name.equals("segment_ids") || name.equals("input_mask") || name.equals("input_ids")) {
+                    return string.append(getName());
+                    // TODO: divine this!
+                }
+            }
+
+            // so, in one case
+//            rankprofile[2].fef.property[35].name "rankingExpression(imported_ml_function_bertsquad8_input_ids).rankingScript"
+//            rankprofile[2].fef.property[35].value "input_ids"
+            // vs
+//            rankprofile[2].fef.property[2].name "rankingExpression(input_ids).rankingScript"
+//            rankprofile[2].fef.property[2].value "attribute(input_ids)"
+            // uppermost is wrong, then we need the below
+
+            return string.append("rankingExpression(").append(getName()).append(')');
+
         }
 
 

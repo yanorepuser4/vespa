@@ -1,8 +1,11 @@
 // Copyright 2018 Yahoo Holdings. Licensed under the terms of the Apache 2.0 license. See LICENSE in the project root.
 package com.yahoo.searchdefinition.processing;
 
+import ai.vespa.rankingexpression.importer.configmodelview.ImportedMlModels;
 import com.yahoo.config.application.api.ApplicationFile;
 import com.yahoo.config.application.api.ApplicationPackage;
+import com.yahoo.config.model.application.provider.BaseDeployLogger;
+import com.yahoo.config.model.deploy.TestProperties;
 import com.yahoo.config.model.test.MockApplicationPackage;
 import com.yahoo.io.GrowableByteBuffer;
 import com.yahoo.io.IOUtils;
@@ -10,6 +13,7 @@ import com.yahoo.io.reader.NamedReader;
 import com.yahoo.path.Path;
 import com.yahoo.search.query.profile.QueryProfileRegistry;
 import com.yahoo.searchdefinition.RankingConstant;
+import com.yahoo.searchdefinition.derived.DerivedConfiguration;
 import com.yahoo.searchdefinition.parser.ParseException;
 import com.yahoo.searchlib.rankingexpression.evaluation.Value;
 import com.yahoo.tensor.Tensor;
@@ -385,6 +389,15 @@ public class RankingExpressionWithTensorFlowTestCase {
         finally {
             IOUtils.recursiveDeleteDir(storedApplicationDirectory.toFile());
         }
+
+        DerivedConfiguration config = new DerivedConfiguration(search.search(),
+                new BaseDeployLogger(),
+                new TestProperties(),
+                search.getRankProfileRegistry(),
+                search.getQueryProfileRegistry(),
+                new ImportedMlModels());
+        config.export("/Users/lesters/temp/bert/idea/");
+
     }
 
     private void assertSmallConstant(String name, TensorType type, RankProfileSearchFixture search) {

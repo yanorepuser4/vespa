@@ -222,7 +222,9 @@ public class RawRankProfile implements RankProfilesConfig.Producer {
                                                              List<ExpressionFunction> functionExpressions) {
             SerializationContext context = new SerializationContext(functionExpressions);
             for (Map.Entry<String, RankProfile.RankingExpressionFunction> e : functions.entrySet()) {
+                System.out.println("Deriving: " + e.getKey());
                 String expressionString = e.getValue().function().getBody().getRoot().toString(new StringBuilder(), context, null, null).toString();
+                System.out.println("-> Done deriving: " + e.getKey() + ": " + expressionString);
                 context.addFunctionSerialization(RankingExpression.propertyName(e.getKey()), expressionString);
 
                 for (Map.Entry<String, TensorType> argumentType : e.getValue().function().argumentTypes().entrySet())

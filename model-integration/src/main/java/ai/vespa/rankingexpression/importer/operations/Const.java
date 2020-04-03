@@ -54,10 +54,10 @@ public class Const extends IntermediateOperation {
     }
 
     /** Constant names are prefixed by "modelName_" to avoid name conflicts between models */
-    @Override
-    public String vespaName() {
-        return modelName + "_" + super.vespaName();
-    }
+//    @Override
+//    public String vespaName() {
+//        return modelName + "_" + super.vespaName();
+//    }
 
     @Override
     public void addDimensionNameConstraints(DimensionRenamer renamer) {

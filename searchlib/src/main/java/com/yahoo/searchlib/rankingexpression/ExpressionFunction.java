@@ -134,6 +134,8 @@ public class ExpressionFunction {
         for (int i = 0; i < arguments.size() && i < argumentValues.size(); ++i) {
             argumentBindings.put(arguments.get(i), argumentValues.get(i).toString(new StringBuilder(), context, path, null).toString());
         }
+        String symbol = toSymbol(argumentBindings);
+        System.out.println("Expanding function " + symbol);
         return new Instance(toSymbol(argumentBindings), body.getRoot().toString(new StringBuilder(), context.withBindings(argumentBindings), path, null).toString());
     }
 

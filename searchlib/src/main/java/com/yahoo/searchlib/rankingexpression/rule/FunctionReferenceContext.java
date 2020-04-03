@@ -22,6 +22,8 @@ public class FunctionReferenceContext {
     /** Mapping from argument names to the expressions they resolve to */
     private final Map<String, String> bindings = new HashMap<>();
 
+    private final FunctionReferenceContext parent;
+
     /** Create a context for a single serialization task */
     public FunctionReferenceContext() {
         this(Collections.emptyList());
@@ -43,9 +45,14 @@ public class FunctionReferenceContext {
 
     /** Create a context for a single serialization task */
     public FunctionReferenceContext(Map<String, ExpressionFunction> functions, Map<String, String> bindings) {
+        this(functions, bindings, null);
+    }
+
+    public FunctionReferenceContext(Map<String, ExpressionFunction> functions, Map<String, String> bindings, FunctionReferenceContext parent) {
         this.functions = ImmutableMap.copyOf(functions);
         if (bindings != null)
             this.bindings.putAll(bindings);
+        this.parent = parent;
     }
 
     private static ImmutableMap<String, ExpressionFunction> toMap(Collection<ExpressionFunction> list) {
@@ -56,16 +63,34 @@ public class FunctionReferenceContext {
     }
 
     /** Returns a function or null if it isn't defined in this context */
-    public ExpressionFunction getFunction(String name) { return functions.get(name); }
+    public ExpressionFunction getFunction(String name) {
+        ExpressionFunction function = functions.get(name);
+        if (function != null) {
+            return function;
+        }
+        if (parent != null) {
+            return parent.getFunction(name);
+        }
+        return null;
+    }
 
     protected ImmutableMap<String, ExpressionFunction> functions() { return functions; }
 
     /** Returns the resolution of an identifier, or null if it isn't defined in this context */
-    public String getBinding(String name) { return bindings.get(name); }
+    public String getBinding(String name) {
+        String binding = bindings.get(name);
+        if (binding != null) {
+            return binding;
+        }
+        if (parent != null) {
+            return parent.getBinding(name);
+        }
+        return null;
+    }
 
     /** Returns a new context with the bindings replaced by the given bindings */
     public FunctionReferenceContext withBindings(Map<String, String> bindings) {
-        return new FunctionReferenceContext(this.functions, bindings);
+        return new FunctionReferenceContext(this.functions, bindings, this);
     }
 
 }

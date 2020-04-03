@@ -53,6 +53,10 @@ public class Slice<NAMETYPE extends Name> extends PrimitiveTensorFunction<NAMETY
         return new Slice<>(arguments.get(0), subspaceAddress);
     }
 
+    public List<DimensionValue<NAMETYPE>> getSubspaceAddress() {
+        return subspaceAddress;
+    }
+
     @Override
     public PrimitiveTensorFunction<NAMETYPE> toPrimitive() { return this; }
 

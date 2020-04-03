@@ -50,7 +50,7 @@ public class SerializationContext extends FunctionReferenceContext {
      */
     public SerializationContext(Collection<ExpressionFunction> functions, Map<String, String> bindings,
                                 Map<String, String> serializedFunctions) {
-        this(toMap(functions), bindings, serializedFunctions);
+        this(toMap(functions), bindings, serializedFunctions, null);
     }
 
     private static ImmutableMap<String, ExpressionFunction> toMap(Collection<ExpressionFunction> list) {
@@ -69,8 +69,8 @@ public class SerializationContext extends FunctionReferenceContext {
      *        is <b>transferred</b> to this and will be modified in it
      */
     public SerializationContext(ImmutableMap<String,ExpressionFunction> functions, Map<String, String> bindings,
-                                Map<String, String> serializedFunctions) {
-        super(functions, bindings);
+                                Map<String, String> serializedFunctions, FunctionReferenceContext root) {
+        super(functions, bindings, root);
         this.serializedFunctions = serializedFunctions;
     }
 
@@ -92,7 +92,7 @@ public class SerializationContext extends FunctionReferenceContext {
 
     @Override
     public SerializationContext withBindings(Map<String, String> bindings) {
-        return new SerializationContext(functions(), bindings, this.serializedFunctions);
+        return new SerializationContext(functions(), bindings, this.serializedFunctions, this);
     }
 
     public Map<String, String> serializedFunctions() { return serializedFunctions; }
