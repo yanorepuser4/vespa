@@ -11,7 +11,6 @@
 #include <vespa/searchcore/proton/common/attribute_updater.h>
 #include <vespa/searchcore/proton/common/pendinglidtracker.h>
 #include <vespa/searchcore/proton/persistenceengine/document_iterator.h>
-#include <vespa/searchcore/proton/persistenceengine/commit_and_wait_document_retriever.h>
 #include <vespa/searchlib/attribute/attributecontext.h>
 #include <vespa/searchlib/attribute/attributefactory.h>
 #include <vespa/searchlib/test/mock_attribute_manager.h>
@@ -486,62 +485,6 @@ TEST("require that iterator stops at the end, and does not auto rewind") {
 TEST("require that iterator ignoring maxbytes stops at the end, and does not auto rewind") {
     DocumentIterator itr(bucket(5), std::make_shared<document::AllFields>(), selectAll(), newestV(), -1, true);
     TEST_DO(verifyIterateIgnoringStopSignal(itr));
-}
-
-void verifyReadConsistency(DocumentIterator & itr, ILidCommitState & lidCommitState) {
-    IDocumentRetriever::SP retriever = doc("id:ns:document::1", Timestamp(2), bucket(5));
-    auto commitAndWaitRetriever = std::make_shared<CommitAndWaitDocumentRetriever>(retriever, lidCommitState);
-    itr.add(commitAndWaitRetriever);
-
-    IterateResult res = itr.iterate(largeNum);
-    EXPECT_TRUE(res.isCompleted());
-    EXPECT_EQUAL(1u, res.getEntries().size());
-    TEST_DO(checkEntry(res, 0, Document(*DataType::DOCUMENT, DocumentId("id:ns:document::1")), Timestamp(2)));
-}
-
-class ILidCommitStateProxy : public ILidCommitState {
-public:
-    explicit ILidCommitStateProxy(ILidCommitState & lidState)
-        : _waitCompleteCount(0),
-          _lidState(lidState)
-    {}
-private:
-    State waitState(State state, uint32_t lid) const override {
-        assert(state == State::COMPLETED);
-        _lidState.waitComplete(lid);
-        _waitCompleteCount++;
-        return state;
-    }
-
-    State waitState(State state, const LidList &lids) const override {
-        assert(state == State::COMPLETED);
-        _lidState.waitComplete(lids);
-        _waitCompleteCount++;
-        return state;
-    }
-
-public:
-    mutable size_t _waitCompleteCount;
-private:
-    ILidCommitState & _lidState;
-};
-
-void verifyStrongReadConsistency(DocumentIterator & itr) {
-    PendingLidTracker lidTracker;
-
-    ILidCommitStateProxy lidCommitState(lidTracker);
-    TEST_DO(verifyReadConsistency(itr, lidCommitState));
-    EXPECT_EQUAL(1u, lidCommitState._waitCompleteCount);
-}
-
-TEST("require that default readconsistency does commit") {
-    DocumentIterator itr(bucket(5), std::make_shared<document::AllFields>(), selectAll(), newestV(), -1, false);
-    TEST_DO(verifyStrongReadConsistency(itr));
-}
-
-TEST("require that readconsistency::strong does commit") {
-    DocumentIterator itr(bucket(5), std::make_shared<document::AllFields>(), selectAll(), newestV(), -1, false, storage::spi::ReadConsistency::STRONG);
-    TEST_DO(verifyStrongReadConsistency(itr));
 }
 
 TEST("require that docid limit is honoured") {

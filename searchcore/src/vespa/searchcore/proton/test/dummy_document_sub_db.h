@@ -29,7 +29,6 @@ struct DummyDocumentSubDb : public IDocumentSubDB
     IIndexWriter::SP         _indexWriter;
     vespalib::ThreadStackExecutor _sharedExecutor;
     std::unique_ptr<ExecutorThreadingService> _writeService;
-    PendingLidTracker        _pendingLidTracker;
 
     DummyDocumentSubDb(std::shared_ptr<bucketdb::BucketDBOwner> bucketDB, uint32_t subDbId)
         : _subDbId(subDbId),
@@ -97,10 +96,6 @@ struct DummyDocumentSubDb : public IDocumentSubDB
     }
     std::shared_ptr<IDocumentDBReference> getDocumentDBReference() override {
         return std::shared_ptr<IDocumentDBReference>();
-    }
-
-    PendingLidTrackerBase &getUncommittedLidsTracker() override {
-        return _pendingLidTracker;
     }
 
     void tearDownReferences(IDocumentDBReferenceResolver &) override { }

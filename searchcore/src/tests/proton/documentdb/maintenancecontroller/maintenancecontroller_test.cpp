@@ -461,10 +461,7 @@ MyDocumentSubDB::getSubDB()
 {
     auto retriever = std::make_shared<MyDocumentRetriever>(*this);
 
-    return MaintenanceDocumentSubDB("my_sub_db", _subDBId,
-                                    _metaStoreSP,
-                                    retriever,
-                                    IFeedView::SP(), nullptr);
+    return MaintenanceDocumentSubDB("my_sub_db", _subDBId, _metaStoreSP, retriever, IFeedView::SP());
 }
 
 

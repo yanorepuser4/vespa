@@ -40,7 +40,6 @@ struct DocumentMoverTest : ::testing::Test
     MySubDbTwoBuckets          _source;
     bucketdb::BucketDBOwner    _bucketDb;
     MyMoveHandler              _handler;
-    PendingLidTracker          _pendingLidsForCommit;
     DocumentMoverTest()
         : _builder(),
           _bucketDB(std::make_shared<bucketdb::BucketDBOwner>()),
@@ -58,8 +57,7 @@ struct DocumentMoverTest : ::testing::Test
                                                   sourceSubDbId,
                                                   _source._subDb.meta_store(),
                                                   _source._subDb.retriever(),
-                                                  _source._subDb.feed_view(),
-                                                  &_pendingLidsForCommit);
+                                                  _source._subDb.feed_view());
         _mover.setupForBucket(bucket, &_source._subDb, targetSubDbId, _handler);
     }
     bool moveDocuments(size_t maxDocsToMove) {
@@ -81,23 +79,6 @@ TEST_F(DocumentMoverTest, require_that_initial_bucket_mover_is_done)
 TEST_F(DocumentMoverTest, require_that_we_can_move_all_documents)
 {
     setupForBucket(_source.bucket(1), 6, 9);
-    EXPECT_TRUE(moveDocuments(5));
-    EXPECT_TRUE(_mover.bucketDone());
-    EXPECT_EQ(5u, _handler._moves.size());
-    EXPECT_EQ(5u, _limiter.beginOpCount);
-    for (size_t i = 0; i < 5u; ++i) {
-        assertEqual(_source.bucket(1), _source.docs(1)[0], 6, 9, _handler._moves[0]);
-    }
-}
-
-TEST_F(DocumentMoverTest, require_that_move_is_stalled_if_document_is_pending_commit)
-{
-    setupForBucket(_source.bucket(1), 6, 9);
-    {
-        IPendingLidTracker::Token token = _pendingLidsForCommit.produce(1);
-        EXPECT_FALSE(moveDocuments(5));
-        EXPECT_FALSE(_mover.bucketDone());
-    }
     EXPECT_TRUE(moveDocuments(5));
     EXPECT_TRUE(_mover.bucketDone());
     EXPECT_EQ(5u, _handler._moves.size());

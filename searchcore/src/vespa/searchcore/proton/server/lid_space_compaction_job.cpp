@@ -88,7 +88,7 @@ void
 CompactionJob::moveDocument(std::shared_ptr<CompactionJob> job, const search::DocumentMetaData & metaThen,
                             std::shared_ptr<IDestructorCallback> context)
 {
-    if (job->stopped()) return; //TODO Remove once lidtracker is no longer in use.
+    if (job->stopped()) return;
     // The real lid must be sampled in the master thread.
     //TODO remove target lid from createMoveOperation interface
     auto op = job->_handler->createMoveOperation(metaThen, 0);

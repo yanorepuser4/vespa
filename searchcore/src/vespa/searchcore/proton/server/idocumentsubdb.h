@@ -120,7 +120,6 @@ public:
     virtual std::shared_ptr<IDocumentDBReference> getDocumentDBReference() = 0;
     virtual void tearDownReferences(IDocumentDBReferenceResolver &resolver) = 0;
     virtual void validateDocStore(FeedHandler &op, SerialNum serialNum) const = 0;
-    virtual PendingLidTrackerBase & getUncommittedLidsTracker() = 0;
 };
 
 } // namespace proton

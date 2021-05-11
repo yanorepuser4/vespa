@@ -47,7 +47,7 @@ public:
           _tlSyncer(tlSyncer)
     { }
 
-    virtual ~DocSubDB() { }
+    ~DocSubDB() override { }
     void close() override { }
 };
 
@@ -232,7 +232,6 @@ public:
     void close() override;
     std::shared_ptr<IDocumentDBReference> getDocumentDBReference() override;
     void tearDownReferences(IDocumentDBReferenceResolver &resolver) override;
-    PendingLidTrackerBase & getUncommittedLidsTracker() override { return *_pendingLidsForCommit; }
 };
 
 }

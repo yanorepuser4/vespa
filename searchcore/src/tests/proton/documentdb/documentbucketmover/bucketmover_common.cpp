@@ -45,7 +45,7 @@ MySubDb::MySubDb(const std::shared_ptr<const DocumentTypeRepo> &repo, std::share
       _metaStore(*_metaStoreSP),
       _realRetriever(std::make_shared<MyDocumentRetriever>(repo)),
       _retriever(_realRetriever),
-      _subDb("my_sub_db", subDbId, _metaStoreSP, _retriever, IFeedView::SP(), nullptr),
+      _subDb("my_sub_db", subDbId, _metaStoreSP, _retriever, IFeedView::SP()),
       _docs(),
       _bucketDBHandler(*bucketDB)
 {

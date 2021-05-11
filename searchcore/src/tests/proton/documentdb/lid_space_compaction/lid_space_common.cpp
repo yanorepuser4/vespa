@@ -212,8 +212,7 @@ MySubDb::MySubDb(std::shared_ptr<bucketdb::BucketDBOwner> bucket_db, const MyDoc
     : sub_db(std::make_unique<DummyDocumentSubDb>(std::move(bucket_db), SUBDB_ID)),
       maintenance_sub_db(sub_db->getName(), sub_db->getSubDbId(), sub_db->getDocumentMetaStoreContext().getSP(),
                          std::make_shared<MyDocumentRetriever>(repo, store),
-                         std::make_shared<MyFeedView>(repo),
-                         &_pendingLidsForCommit)
+                         std::make_shared<MyFeedView>(repo))
 {
 }
 
