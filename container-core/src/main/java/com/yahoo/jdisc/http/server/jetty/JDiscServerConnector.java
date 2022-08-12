@@ -3,6 +3,7 @@ package com.yahoo.jdisc.http.server.jetty;
 
 import com.yahoo.jdisc.Metric;
 import com.yahoo.jdisc.http.ConnectorConfig;
+import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.io.ConnectionStatistics;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -31,9 +32,10 @@ class JDiscServerConnector extends ServerConnector {
     private final String connectorName;
     private final int listenPort;
 
-    JDiscServerConnector(ConnectorConfig config, Metric metric, Server server, JettyConnectionLogger connectionLogger,
-                         ConnectionMetricAggregator connectionMetricAggregator, ConnectionFactory... factories) {
-        super(server, factories);
+    JDiscServerConnector(ConnectorConfig config, Metric metric, Server server, ByteBufferPool bufferPool,
+                         JettyConnectionLogger connectionLogger, ConnectionMetricAggregator connectionMetricAggregator,
+                         ConnectionFactory... factories) {
+        super(server, null, null, bufferPool, -1, -1, factories);
         this.config = config;
         this.tcpKeepAlive = config.tcpKeepAliveEnabled();
         this.tcpNoDelay = config.tcpNoDelay();

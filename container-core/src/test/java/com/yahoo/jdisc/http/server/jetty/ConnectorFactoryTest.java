@@ -82,7 +82,7 @@ public class ConnectorFactoryTest {
                 new VoidConnectionLog());
         DummyMetric metric = new DummyMetric();
         var connectionMetricAggregator = new ConnectionMetricAggregator(new ServerConfig(new ServerConfig.Builder()), metric);
-        return (JDiscServerConnector)factory.createConnector(metric, server, connectionLogger, connectionMetricAggregator);
+        return (JDiscServerConnector)factory.createConnector(metric, server, null, connectionLogger, connectionMetricAggregator);
     }
 
     private static class HelloWorldHandler extends AbstractHandler {

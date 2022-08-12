@@ -13,6 +13,7 @@ import org.eclipse.jetty.http.HttpCompliance;
 import org.eclipse.jetty.http2.server.AbstractHTTP2ServerConnectionFactory;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.http2.server.HTTP2ServerConnectionFactory;
+import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.DetectorConnectionFactory;
@@ -79,10 +80,10 @@ public class ConnectorFactory {
         return connectorConfig;
     }
 
-    public ServerConnector createConnector(final Metric metric, final Server server, JettyConnectionLogger connectionLogger,
-                                           ConnectionMetricAggregator connectionMetricAggregator) {
+    public ServerConnector createConnector(final Metric metric, final Server server, ByteBufferPool bufferPool,
+                                           JettyConnectionLogger connectionLogger, ConnectionMetricAggregator connectionMetricAggregator) {
         ServerConnector connector = new JDiscServerConnector(
-                connectorConfig, metric, server, connectionLogger, connectionMetricAggregator,
+                connectorConfig, metric, server, bufferPool, connectionLogger, connectionMetricAggregator,
                 createConnectionFactories(metric).toArray(ConnectionFactory[]::new));
         connector.setPort(connectorConfig.listenPort());
         connector.setName(connectorConfig.name());

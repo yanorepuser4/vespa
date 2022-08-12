@@ -11,6 +11,8 @@ import com.yahoo.jdisc.http.ServerConfig;
 import com.yahoo.jdisc.service.AbstractServerProvider;
 import com.yahoo.jdisc.service.CurrentContainer;
 import org.eclipse.jetty.http.HttpField;
+import org.eclipse.jetty.io.ArrayByteBufferPool;
+import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.jmx.ConnectorServer;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.server.Connector;
@@ -76,27 +78,22 @@ public class JettyHttpServer extends AbstractServerProvider {
         configureJettyThreadpool(server, serverConfig);
         JettyConnectionLogger connectionLogger = new JettyConnectionLogger(serverConfig.connectionLog(), connectionLog);
         ConnectionMetricAggregator connectionMetricAggregator = new ConnectionMetricAggregator(serverConfig, metric);
+        ByteBufferPool bufferPool = new ThreadLocalByteBufferPool(new ArrayByteBufferPool());
 
         for (ConnectorFactory connectorFactory : connectorFactories.allComponents()) {
             ConnectorConfig connectorConfig = connectorFactory.getConnectorConfig();
-            server.addConnector(connectorFactory.createConnector(metric, server, connectionLogger, connectionMetricAggregator));
+            server.addConnector(connectorFactory.createConnector(metric, server, bufferPool, connectionLogger, connectionMetricAggregator));
             listenedPorts.add(connectorConfig.listenPort());
         }
 
-        JDiscContext jDiscContext = new JDiscContext(filterBindings,
-                                                     container,
-                                                     janitor,
-                                                     metric,
-                                                     serverConfig);
+        JDiscContext jDiscContext = new JDiscContext(filterBindings, container, janitor, metric, serverConfig);
 
         ServletHolder jdiscServlet = new ServletHolder(new JDiscHttpServlet(jDiscContext));
         List<JDiscServerConnector> connectors = Arrays.stream(server.getConnectors())
                                                       .map(JDiscServerConnector.class::cast)
                                                       .collect(toList());
 
-        server.setHandler(getHandlerCollection(serverConfig,
-                                               connectors,
-                                               jdiscServlet));
+        server.setHandler(getHandlerCollection(serverConfig, connectors, jdiscServlet));
         this.metricsReporter = new ServerMetricReporter(metric, server);
     }
 
@@ -190,7 +187,7 @@ public class JettyHttpServer extends AbstractServerProvider {
             logEffectiveSslConfiguration();
         } catch (final Exception e) {
             if (e instanceof IOException && e.getCause() instanceof BindException) {
-                throw new RuntimeException("Failed to start server due to BindException. ListenPorts = " + listenedPorts.toString(), e.getCause());
+                throw new RuntimeException("Failed to start server due to BindException. ListenPorts = " + listenedPorts, e.getCause());
             }
             throw new RuntimeException("Failed to start server.", e);
         }
