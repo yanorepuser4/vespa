@@ -933,12 +933,15 @@ struct DimensionOverridableTestMetricSet : MetricSet
 {
     DoubleValueMetric val;
 
-    DimensionOverridableTestMetricSet(const std::string& dimValue,
-                                MetricSet* owner = nullptr)
-        : MetricSet("temp", {{"foo", dimValue}}, "", owner),
-          val("val", {}, "val desc", this)
-    { }
+    DimensionOverridableTestMetricSet(const std::string& dimValue, MetricSet* owner = nullptr);
+    ~DimensionOverridableTestMetricSet() override;
 };
+
+DimensionOverridableTestMetricSet::DimensionOverridableTestMetricSet(const std::string& dimValue, MetricSet* owner)
+    : MetricSet("temp", {{"foo", dimValue}}, "", owner),
+      val("val", {}, "val desc", this)
+{ }
+DimensionOverridableTestMetricSet::~DimensionOverridableTestMetricSet() = default;
 
 struct SameNamesTestMetricSet : MetricSet
 {
@@ -954,7 +957,7 @@ SameNamesTestMetricSet::SameNamesTestMetricSet()
       set1("bar", this),
       set2("baz", this)
 { }
-SameNamesTestMetricSet::~SameNamesTestMetricSet() { }
+SameNamesTestMetricSet::~SameNamesTestMetricSet() = default;
 
 }
 
