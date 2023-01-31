@@ -898,12 +898,16 @@ struct NestedDimensionTestMetricSet : MetricSet
 {
     DimensionTestMetricSet nestedSet;
 
-    NestedDimensionTestMetricSet()
-        : MetricSet("outer", {{"fancy", "stuff"}}, ""),
-          nestedSet(this)
-    {
-    }
+    NestedDimensionTestMetricSet();
+    ~NestedDimensionTestMetricSet();
 };
+
+NestedDimensionTestMetricSet::NestedDimensionTestMetricSet()
+    : MetricSet("outer", {{"fancy", "stuff"}}, ""),
+      nestedSet(this)
+{
+}
+NestedDimensionTestMetricSet::~NestedDimensionTestMetricSet() = default;
 
 }
 
