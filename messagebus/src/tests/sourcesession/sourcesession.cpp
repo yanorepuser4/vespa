@@ -13,7 +13,6 @@
 #include <vespa/messagebus/routing/routingspec.h>
 #include <vespa/messagebus/testlib/simplemessage.h>
 #include <vespa/messagebus/testlib/simpleprotocol.h>
-#include <vespa/messagebus/testlib/simplereply.h>
 #include <vespa/messagebus/testlib/slobrok.h>
 #include <vespa/messagebus/testlib/testserver.h>
 #include <vespa/vespalib/testkit/testapp.h>
@@ -183,7 +182,7 @@ Test::testResendConnDown()
                    RPCNetworkParams(slobrok.config()));
     src.mb.setupRouting(RoutingSpec().addTable(RoutingTableSpec(SimpleProtocol::NAME)
                                                .addHop(HopSpec("dst", "dst2/session"))
-                                               .addHop(HopSpec("pxy", "[All]").addRecipient("dst"))
+                                               .addHop(std::move(HopSpec("pxy", "[All]").addRecipient("dst")))
                                                .addRoute(RouteSpec("dst").addHop("pxy"))));
     RoutableQueue srcQ;
     SourceSession::UP ss = src.mb.createSourceSession(srcQ);

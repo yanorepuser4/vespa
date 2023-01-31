@@ -1302,7 +1302,7 @@ void
 Test::testHopBlueprintIgnoresReply(TestData &data)
 {
     data._srcServer.mb.setupRouting(RoutingSpec().addTable(RoutingTableSpec(SimpleProtocol::NAME)
-                                                           .addHop(HopSpec("foo", "dst/session").setIgnoreResult(true))));
+                                                           .addHop(std::move(HopSpec("foo", "dst/session").setIgnoreResult(true)))));
     EXPECT_TRUE(data._srcSession->send(createMessage("msg"), Route::parse("foo")).isAccepted());
     Message::UP msg = data._dstHandler.getMessage(RECEPTOR_TIMEOUT);
     ASSERT_TRUE(msg);

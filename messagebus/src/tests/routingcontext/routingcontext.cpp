@@ -297,10 +297,10 @@ Test::testSingleDirective(TestData &data)
     data._srcServer.mb.putProtocol(protocol);
     data._srcServer.mb.setupRouting(RoutingSpec().addTable(RoutingTableSpec(SimpleProtocol::NAME)
                                                            .addRoute(RouteSpec("myroute").addHop("myhop"))
-                                                           .addHop(HopSpec("myhop", "[Custom]")
+                                                           .addHop(std::move(HopSpec("myhop", "[Custom]")
                                                                    .addRecipient("foo")
                                                                    .addRecipient("bar")
-                                                                   .addRecipient("baz/cox"))));
+                                                                   .addRecipient("baz/cox")))));
     for (uint32_t i = 0; i < 2; ++i) {
         EXPECT_TRUE(data._srcSession->send(createMessage("msg"), "myroute").isAccepted());
         Reply::UP reply = data._srcHandler.getReply();
@@ -322,12 +322,12 @@ Test::testMoreDirectives(TestData &data)
     data._srcServer.mb.putProtocol(protocol);
     data._srcServer.mb.setupRouting(RoutingSpec().addTable(RoutingTableSpec(SimpleProtocol::NAME)
                                                            .addRoute(RouteSpec("myroute").addHop("myhop"))
-                                                           .addHop(HopSpec("myhop", "foo/[Custom]/baz")
+                                                           .addHop(std::move(HopSpec("myhop", "foo/[Custom]/baz")
                                                                    .addRecipient("foo")
                                                                    .addRecipient("foo/bar")
                                                                    .addRecipient("foo/bar0/baz")
                                                                    .addRecipient("foo/bar1/baz")
-                                                                   .addRecipient("foo/bar/baz/cox"))));
+                                                                   .addRecipient("foo/bar/baz/cox")))));
     for (uint32_t i = 0; i < 2; ++i) {
         EXPECT_TRUE(data._srcSession->send(createMessage("msg"), "myroute").isAccepted());
         Reply::UP reply = data._srcHandler.getReply();
@@ -353,8 +353,8 @@ Test::testRecipientsRemain(TestData &data)
     data._srcServer.mb.putProtocol(protocol);
     data._srcServer.mb.setupRouting(RoutingSpec().addTable(RoutingTableSpec(SimpleProtocol::NAME)
                                                            .addRoute(RouteSpec("myroute").addHop("myhop"))
-                                                           .addHop(HopSpec("myhop", "[First]/[Second]")
-                                                                   .addRecipient("foo/bar"))));
+                                                           .addHop(std::move(HopSpec("myhop", "[First]/[Second]")
+                                                                   .addRecipient("foo/bar")))));
     for (uint32_t i = 0; i < 2; ++i) {
         EXPECT_TRUE(data._srcSession->send(createMessage("msg"), "myroute").isAccepted());
         Reply::UP reply = data._srcHandler.getReply();
@@ -377,7 +377,7 @@ Test::testConstRoute(TestData &data)
     data._srcServer.mb.putProtocol(protocol);
     data._srcServer.mb.setupRouting(RoutingSpec().addTable(RoutingTableSpec(SimpleProtocol::NAME)
                                                            .addRoute(RouteSpec("default").addHop("indexing"))
-                                                           .addHop(HopSpec("indexing", "[DocumentRouteSelector]").addRecipient("dst"))
+                                                           .addHop(std::move(HopSpec("indexing", "[DocumentRouteSelector]").addRecipient("dst")))
                                                            .addHop(HopSpec("dst", "dst/session"))));
     for (uint32_t i = 0; i < 2; ++i) {
         EXPECT_TRUE(data._srcSession->send(createMessage("msg"), Route::parse("route:default")).isAccepted());
