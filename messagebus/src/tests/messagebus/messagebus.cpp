@@ -30,11 +30,11 @@ struct Base {
         return RoutingSpec()
             .addTable(RoutingTableSpec("Simple")
                       .addHop(HopSpec("DocProc", "docproc/*/session"))
-                      .addHop(HopSpec("Search", "search/[All]/[Hash]/session")
+                      .addHop(std::move(HopSpec("Search", "search/[All]/[Hash]/session")
                               .addRecipient("search/r.0/c.0/session")
                               .addRecipient("search/r.0/c.1/session")
                               .addRecipient("search/r.1/c.0/session")
-                              .addRecipient("search/r.1/c.1/session"))
+                              .addRecipient("search/r.1/c.1/session")))
                       .addRoute(RouteSpec("Index").addHop("DocProc").addHop("Search"))
                       .addRoute(RouteSpec("DocProc").addHop("DocProc"))
                       .addRoute(RouteSpec("Search").addHop("Search")));
