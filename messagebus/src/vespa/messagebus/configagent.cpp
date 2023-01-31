@@ -29,7 +29,7 @@ ConfigAgent::configure(std::unique_ptr<MessagebusConfig> config)
                 hopSpec.addRecipient(hop.recipient[i]);
             }
             hopSpec.setIgnoreResult(hop.ignoreresult);
-            tableSpec.addHop(hopSpec);
+            tableSpec.addHop(std::move(hopSpec));
         }
         for (uint32_t r = 0; r < table.route.size(); ++r) {
             const CFG::Routingtable::Route &route = table.route[r];
