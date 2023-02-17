@@ -5,18 +5,15 @@ package com.yahoo.metrics;
  */
 public enum ContainerMetrics implements VespaMetrics {
 
+    HTTP_STATUS("http.status", "HTTP server status for the container"),
     HTTP_STATUS_1XX("http.status.1xx", Unit.RESPONSE, "Number of responses with a 1xx status"),
     HTTP_STATUS_2XX("http.status.2xx", Unit.RESPONSE, "Number of responses with a 2xx status"),
     HTTP_STATUS_3XX("http.status.3xx", Unit.RESPONSE, "Number of responses with a 3xx status"),
     HTTP_STATUS_4XX("http.status.4xx", Unit.RESPONSE, "Number of responses with a 4xx status"),
     HTTP_STATUS_5XX("http.status.5xx", Unit.RESPONSE, "Number of responses with a 5xx status"),
 
-    JDISC_GC_COUNT("jdisc.gc.count", Unit.OPERATION, "Number of JVM garbage collections done"),
-    JDISC_GC_MS("jdisc.gc.ms", Unit.MILLISECOND, "Time spent in JVM garbage collection"),
-    JDISC_JVM("jdisc.jvm", Unit.VERSION, "JVM runtime version"),
-    JDISC_MEMORY_MAPPINGS("jdisc.memory_mappings", Unit.OPERATION, "JDISC Memory mappings"),
-    JDISC_OPEN_FILE_DESCRIPTORS("jdisc.open_file_descriptors", Unit.ITEM, "JDISC Open file descriptors"),
 
+    JDISC_THREAD_POOL("jdisc.thread_pool", "Container Thread pools, used for handling of HTTP requests."),
     JDISC_THREAD_POOL_UNHANDLED_EXCEPTIONS("jdisc.thread_pool.unhandled_exceptions", Unit.THREAD, "Number of exceptions thrown by tasks"),
     JDISC_THREAD_POOL_WORK_QUEUE_CAPACITY("jdisc.thread_pool.work_queue.capacity", Unit.THREAD, "Capacity of the task queue"),
     JDISC_THREAD_POOL_WORK_QUEUE_SIZE("jdisc.thread_pool.work_queue.size", Unit.THREAD, "Size of the task queue"),
@@ -24,7 +21,15 @@ public enum ContainerMetrics implements VespaMetrics {
     JDISC_THREAD_POOL_SIZE("jdisc.thread_pool.size", Unit.THREAD, "Size of the thread pool"),
     JDISC_THREAD_POOL_MAX_ALLOWED_SIZE("jdisc.thread_pool.max_allowed_size", Unit.THREAD, "The maximum allowed number of threads in the pool"),
     JDISC_THREAD_POOL_ACTIVE_THREADS("jdisc.thread_pool.active_threads", Unit.THREAD, "Number of threads that are active"),
-    
+
+
+    JDISC_GC_COUNT("jdisc.gc.count", Unit.OPERATION, "Number of JVM garbage collections done"),
+    JDISC_GC_MS("jdisc.gc.ms", Unit.MILLISECOND, "Time spent in JVM garbage collection"),
+    JDISC_JVM("jdisc.jvm", Unit.VERSION, "JVM runtime version"),
+    JDISC_MEMORY_MAPPINGS("jdisc.memory_mappings", Unit.OPERATION, "JDISC Memory mappings"),
+    JDISC_OPEN_FILE_DESCRIPTORS("jdisc.open_file_descriptors", Unit.ITEM, "JDISC Open file descriptors"),
+
+
     JDISC_DEACTIVATED_CONTAINERS("jdisc.deactivated_containers.total", Unit.ITEM, "JDISC Deactivated container instances"),
     JDISC_DEACTIVATED_CONTAINERS_WITH_RETAINED_REFS("jdisc.deactivated_containers.with_retained_refs.last", Unit.ITEM, "JDISC Deactivated container nodes with retained refs"),
     JDISC_APPLICATION_FAILED_COMPONENT_GRAPHS("jdisc.application.failed_component_graphs", Unit.ITEM, "JDISC Application failed component graphs"),
@@ -195,6 +200,12 @@ public enum ContainerMetrics implements VespaMetrics {
         this.description = description;
     }
 
+    // Constructor used for documenting components producing subsets of metrics, not for actual metrics.
+    ContainerMetrics(String name, String description) {
+        this.name = name;
+        this.unit = unit.NONE;
+        this.description = description;
+    }
     public String baseName() {
         return name;
     }
