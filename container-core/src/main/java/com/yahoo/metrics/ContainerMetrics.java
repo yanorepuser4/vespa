@@ -203,9 +203,10 @@ public enum ContainerMetrics implements VespaMetrics {
     // Constructor used for documenting components producing subsets of metrics, not for actual metrics.
     ContainerMetrics(String name, String description) {
         this.name = name;
-        this.unit = unit.NONE;
+        this.unit = Unit.NONE;
         this.description = description;
     }
+
     public String baseName() {
         return name;
     }
