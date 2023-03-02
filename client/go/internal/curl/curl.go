@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/kballard/go-shellquote"
 	"github.com/vespa-engine/vespa/client/go/internal/util"
 )
 
@@ -77,7 +76,7 @@ func (c *Command) Args() []string {
 func (c *Command) String() string {
 	args := []string{c.Path}
 	args = append(args, c.Args()...)
-	return shellquote.Join(args...)
+	return util.ShellQuoteArgs(args...)
 }
 
 func (c *Command) Header(key, value string) {

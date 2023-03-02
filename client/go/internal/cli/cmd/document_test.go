@@ -113,7 +113,7 @@ func assertDocumentSend(arguments []string, expectedOperation string, expectedMe
 		}
 	}
 	if verbose {
-		expectedCurl := "curl -X " + expectedMethod + " -H 'Content-Type: application/json' --data-binary @" + expectedPayloadFile + " " + expectedURL + "\n"
+		expectedCurl := "curl -X " + expectedMethod + " -H 'Content-Type: application/json' --data-binary '@" + expectedPayloadFile + "' " + expectedURL + "\n"
 		assert.Equal(t, expectedCurl, stderr.String())
 	}
 	assert.Equal(t, "Success: "+expectedOperation+" "+expectedDocumentId+"\n", stdout.String())

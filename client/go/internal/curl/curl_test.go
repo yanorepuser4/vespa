@@ -17,7 +17,7 @@ func TestPost(t *testing.T) {
 	c.WithBodyFile("file.json")
 	c.Header("Content-Type", "application/json")
 
-	assert.Equal(t, "curl --key key.pem --cert cert.pem -X POST -H 'Content-Type: application/json' --data-binary @file.json https://example.com", c.String())
+	assert.Equal(t, "curl --key key.pem --cert cert.pem -X POST -H 'Content-Type: application/json' --data-binary '@file.json' https://example.com", c.String())
 }
 
 func TestGet(t *testing.T) {
@@ -30,7 +30,7 @@ func TestGet(t *testing.T) {
 	c.Param("yql", "select * from sources * where title contains 'foo';")
 	c.Param("hits", "5")
 
-	assert.Equal(t, `curl --key key.pem --cert cert.pem https://example.com\?hits=5\&yql=select+%2A+from+sources+%2A+where+title+contains+%27foo%27%3B`, c.String())
+	assert.Equal(t, `curl --key key.pem --cert cert.pem 'https://example.com?hits=5&yql=select+%2A+from+sources+%2A+where+title+contains+%27foo%27%3B'`, c.String())
 }
 
 func TestRawArgs(t *testing.T) {

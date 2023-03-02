@@ -180,7 +180,7 @@ func (p *shellEnvExporter) fallbackVar(varName, varVal string) {
 }
 func (p *shellEnvExporter) overrideVar(varName, varVal string) {
 	delete(p.unsetVars, varName)
-	p.exportVars[varName] = shellQuote(varVal)
+	p.exportVars[varName] = util.ShellQuote(varVal)
 }
 func (p *shellEnvExporter) unsetVar(varName string) {
 	delete(p.exportVars, varName)
@@ -194,60 +194,6 @@ func (p *shellEnvExporter) currentValue(varName string) string {
 		return val
 	}
 	return os.Getenv(varName)
-}
-
-func shellQuote(s string) string {
-	l := 0
-	nq := false
-	for _, ch := range s {
-		switch {
-		case (ch >= 'A' && ch <= 'Z') ||
-			(ch >= 'a' && ch <= 'z') ||
-			(ch >= '0' && ch <= '9'):
-			l++
-		case ch == '_' || ch == ' ':
-			l++
-			nq = true
-		case ch == '\'' || ch == '\\':
-			l = l + 4
-			nq = true
-		default:
-			l++
-			nq = true
-		}
-	}
-	if nq {
-		l = l + 2
-	}
-	res := make([]rune, l)
-	i := 0
-	if nq {
-		res[i] = '\''
-		i++
-	}
-	for _, ch := range s {
-		if ch == '\'' || ch == '\\' {
-			res[i] = '\''
-			i++
-			res[i] = '\\'
-			i++
-			res[i] = ch
-			i++
-			res[i] = '\''
-		} else {
-			res[i] = ch
-		}
-		i++
-	}
-	if nq {
-		res[i] = '\''
-		i++
-	}
-	if i != l {
-		err := fmt.Errorf("expected length %d but was %d", l, i)
-		util.JustExitWith(err)
-	}
-	return string(res)
 }
 
 func (p *shellEnvExporter) dump() {
