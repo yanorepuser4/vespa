@@ -11,6 +11,7 @@ import com.yahoo.config.provision.ClusterMembership;
 import com.yahoo.config.provision.ClusterSpec;
 import com.yahoo.config.provision.Zone;
 import com.yahoo.vespa.model.Service;
+import com.yahoo.vespa.model.admin.monitoring.MetricsConsumer;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -145,6 +146,28 @@ public class OpenTelemetryConfigGenerator {
         g.writeFieldName("processors");
         g.writeStartObject();
         addResourceProcessor(g);
+        addRenameProcessor(g);
+        g.writeEndObject();
+    }
+    private void addRenameProcessor(JsonGenerator g) throws java.io.IOException {
+        g.writeFieldName("metricstransform/rename");
+        g.writeStartObject();
+        g.writeFieldName("transforms");
+        g.writeStartArray();
+        var metrics = MetricsConsumer.vespa9.metrics();
+        for (var metric : metrics.values()) {
+            if (! metric.name.equals(metric.outputName)) {
+                addRenameAction(g, metric.name, metric.outputName);
+            }
+        }
+        g.writeEndArray();
+        g.writeEndObject();
+    }
+    private void addRenameAction(JsonGenerator g, String oldName, String newName) throws java.io.IOException {
+        g.writeStartObject();
+        g.writeStringField("include", oldName);
+        g.writeStringField("action", "update");
+        g.writeStringField("new_name", newName);
         g.writeEndObject();
     }
     private void addResourceProcessor(JsonGenerator g) throws java.io.IOException {
@@ -208,6 +231,7 @@ public class OpenTelemetryConfigGenerator {
         }
         g.writeFieldName("processors");
         g.writeStartArray();
+        g.writeString("metricstransform/rename");
         g.writeString("resource");
         g.writeEndArray();
         {
@@ -300,12 +324,13 @@ public class OpenTelemetryConfigGenerator {
         dimvals.put("instanceType", svc.getServiceType()); // maybe "local_service_type", or remove
         String cName = svc.getServicePropertyString("clustername", null);
         if (cName != null) {
-            // what about "clusterid" below, is it always the same?
-            dimvals.put("clustername", cName);
+            // overridden by cluster membership below (if available)
+            dimvals.put(PublicDimensions.INTERNAL_CLUSTER_ID, cName);
         }
         String cType = svc.getServicePropertyString("clustertype", null);
         if (cType != null) {
-            dimvals.put("clustertype", cType);
+            // overridden by cluster membership below (if available)
+            dimvals.put(PublicDimensions.INTERNAL_CLUSTER_TYPE, cType);
         }
         var hostResource = svc.getHost();
         if (hostResource != null) {
